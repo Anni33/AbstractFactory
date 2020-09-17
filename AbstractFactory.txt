@@ -1,0 +1,120 @@
+
+
+//Используя шаблон «Абстрактная фабрика» реализовать программу создания автомобилей
+
+#include <iostream>
+
+using namespace std;
+
+
+class Engine {
+ public:
+  virtual ~Engine(){};
+  virtual string UsefulFunctionA() const = 0;
+};
+
+
+class FordEngine : public Engine{
+ public:
+  string UsefulFunctionA() const override {
+    return " FordEngine";
+  }
+};
+
+class ToyotaEngine : public Engine{
+  string UsefulFunctionA() const override {
+    return " ToyotaEngine";
+  }
+};
+
+class Transmission {
+ public:
+  virtual ~Transmission(){};
+  virtual string UsefulFunctionB() const = 0;
+  virtual string AnotherUsefulFunctionB(const Engine &collaborator) const = 0;
+};
+
+
+class FordTransmission : public  Transmission {
+ public:
+  string UsefulFunctionB() const override {
+    return " FordTransmission";
+  }
+  string AnotherUsefulFunctionB(const Engine &collaborator) const override {
+    const string result = collaborator.UsefulFunctionA();
+    return "Сборка FordTransmission с ( " + result + " )";
+  }
+};
+
+class ToyotaTransmission : public Transmission {
+  string UsefulFunctionB() const override {
+    return " ToyotaTransmission";
+  }
+  string AnotherUsefulFunctionB(const Engine &collaborator) const override {
+    const string result = collaborator.UsefulFunctionA();
+    return "Сборка ToyotaTransmission с ( " + result + " )";
+  }
+};
+
+
+class CarFactory {
+ public:
+  virtual Engine *CreateEngine() const = 0;
+  virtual Transmission  *CreateTransmission() const = 0;
+};
+
+class FordCarFactory : public CarFactory { 
+ public:
+  Engine *CreateEngine() const override {
+    return new FordEngine();
+  }
+  Transmission *CreateTransmission() const override {
+    return new FordTransmission ();
+  }
+};
+
+ 
+class ToyotaCarFactory : public CarFactory {
+ public:
+ Engine*CreateEngine() const override {
+    return new ToyotaEngine ();
+  }
+  Transmission *CreateTransmission() const override {
+    return new ToyotaTransmission ();
+  }
+};
+
+
+void Client(const CarFactory &carFactory) {   
+  const Engine *engine = carFactory.CreateEngine();
+  const  Transmission *transmission = carFactory.CreateTransmission();
+  cout << transmission->UsefulFunctionB() << "\n";
+  cout << transmission->AnotherUsefulFunctionB(*engine) << "\n";
+  delete engine ;
+  delete transmission;
+}
+
+int main() { 
+  cout << "Client: Сборка машины марки Ford  :\n";
+  FordCarFactory *fordf = new FordCarFactory();
+  Client(*fordf );
+  delete fordf ;
+  cout << endl;
+  cout << "Client: Сборка машины марки Toyota :\n";
+  ToyotaCarFactory *toyotaf = new ToyotaCarFactory();
+  Client(*toyotaf);
+  delete toyotaf;
+  return 0;
+}
+
+
+
+
+Вывод:
+Client: Сборка машины марки Ford  :                                                                                          
+ FordTransmission                                                                                                            
+Сборка FordTransmission с (  FordEngine )                                                                                    
+                                                                                                                             
+Client: Сборка машины марки Toyota :                                                                                         
+ ToyotaTransmission                                                                                                          
+Сборка ToyotaTransmission с (  ToyotaEngine )
